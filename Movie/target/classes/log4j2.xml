@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+ 
+	<!-- Appender, Layout 설정 -->
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern=" %-5level %c(%M%L) - %m%n" />
+		</Console>
+	</Appenders>
+ 
+	 <!-- Logger 설정 -->
+	<Loggers>
+		<Root level="INFO" >
+			<AppenderRef ref="console"/>  
+		</Root>
+		<Logger name="java.sql" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+		</Logger>
+		<Logger name="org.firstgroup" level="INFO" additivity="false">
+			<AppenderRef ref="console"/>  
+		</Logger>
+		<Logger name="jdbc.sqltiming" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+		</Logger>
+		<Logger name="org.springframework" level="INFO" additivity="false">
+			<AppenderRef ref="console"/>  
+		</Logger>
+		<Logger name="org.springframework" level="DEBUG" additivity="false">
+			<AppenderRef ref="console"/>  
+		</Logger>
+		<Logger name="org.springframework" level="WARN" additivity="false">
+			<AppenderRef ref="console"/>  
+		</Logger>
+	</Loggers>
+</Configuration>

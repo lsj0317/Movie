@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:security="http://www.springframework.org/schema/security"
+xsi:schemaLocation="http://www.springframework.org/schema/security
+http://www.springframework.org/schema/security/spring-security.xsd
+http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="customLoginSuccess" class="com.firstgroup.movies.security.CustomLoginSuccessHandler"></bean>
+	<bean id="customLogoutSuccessHandler" class="com.firstgroup.movies.security.CustomLogoutSuccessHandler" />
+	<bean id="customAccessDenied" class="com.firstgroup.movies.security.CustomAccessDeniedHandler"></bean>
+	<!-- 커스텀 패스워드 인코더 -->
+<!-- 	<bean id="customPasswordEncoder" class="com.firstgroup.movies.security.CustomNoOpPasswordEncoder"></bean> -->
+	<!-- 패스워드 인코더 -->
+	<bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	<bean id="customUserDetailsService" class="com.firstgroup.movies.security.CustomUserDetailsService" />
+	
+	<security:http auto-config="true">
+		<!-- Guest 사용자를 anonymous로 설정 -->
+	    <security:anonymous enabled="true" username="guest"/>
+	    <!-- Guest 권한에 대한 접근 설정 -->    
+	    <security:intercept-url pattern="/" access="permitAll"/>
+    	<security:intercept-url pattern="/home" access="permitAll"/>
+	    <security:intercept-url pattern="/login" access="permitAll"/>
+	    <security:intercept-url pattern="/loginAuth" access="permitAll"/>
+	    <security:intercept-url pattern="/member/update" access="hasAnyRole('ROLE_MEMBER','ROLE_MANAGER')"/>
+	    <security:intercept-url pattern="/admin/*" access="hasRole('ROLE_ADMIN')"/>
+	    <!-- 나머지 설정... -->
+		<!-- <security:intercept-url pattern="/home" access="hasRole('ROLE_ADMIN')"/> -->
+		<!-- 접근 거부시 -->
+		<security:access-denied-handler ref="customAccessDenied"/>
+		<!-- 로그인 페이지 인터셉트 경로 -->
+		<security:form-login username-parameter="id" password-parameter="pw" login-page="/loginAuth" authentication-success-handler-ref="customLoginSuccess"/>
+		<security:remember-me data-source-ref="dataSource" token-validity-seconds="604800" />
+		<security:logout logout-url="/home" invalidate-session="true" delete-cookies="remember-me,JSESSION_ID" logout-success-url="/"/>
+	</security:http>
+	<security:authentication-manager>
+		<!-- jdbc 연결 커스텀 유저 인증 -->
+		<security:authentication-provider user-service-ref="customUserDetailsService">
+			<security:password-encoder ref="bcryptPasswordEncoder" />
+			
+			<!-- jdbc 연결 인증 -->
+			<!-- <security:jdbc-user-service data-source-ref="dataSource"
+			users-by-username-query="select id , pw, enabled from tbl_member where id = ?"
+			authorities-by-username-query="select id, auth from tbl_member_auth where id = ? "/>
+			<security:password-encoder ref="bcryptPasswordEncoder"/> -->
+<!-- 			<security:user-service>
+				임시 계정 생성
+				<security:user name="member" password="{noop}member" authorities="ROLE_MEMBER" />
+				<security:user name="admin" password="{noop}admin" authorities="ROLE_ADMIN"/>
+			</security:user-service> -->
+		</security:authentication-provider>
+	</security:authentication-manager>
+</beans>

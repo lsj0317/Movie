@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.firstgroup.movies.mapper.MoviesCommentMapper">
+  
+  <!-- 댓글리스트 전체 불러오기 -->
+	  <select id="getCommentList" resultType="com.firstgroup.movies.domain.MoviesCommentVO">
+	  
+		  <![CDATA[ 
+			select mem.membno, mem.name, mem.nickname, mem.mem_imgno, com.content, com.stars, com.recommend, com.regdate, com.up_date, com.movbno, com.combno
+			FROM 
+	  		tbl_movies_comment com INNER JOIN tbl_member mem on com.membno = mem.membno
+			WHERE com.movbno = #{movbno}  AND com.combno IS NOT NULL 
+			ORDER BY com.regdate DESC 
+			]]>
+	  </select>
+	  
+	<select id="getListPage" resultType="com.firstgroup.movies.domain.MoviesCommentVO">
+		<![CDATA[
+		select *
+		from
+		(
+		select /*+INDEX(tbl_movies_comment idx_reply*/
+		rownum rn, rno, bno,  reply, replyer, replydate, updatedate
+		from tbl_movies_comment
+		where bno = #{bno} 
+		and rno > 0 
+		and rownum <= #{cri.pageNum} * #{cri.amount} 
+		) where rn > (#{cri.pageNum} - 1) * #{cri.amount}
+		]]>
+	</select>
+	
+	<insert id="insertComment"  >
+		insert into tbl_movies_comment (combno, movbno, content, membno, regdate, stars)
+		values(seq_comment.nextval, #{movBno}, #{content}, #{memBno}, sysdate, #{stars})
+	</insert>
+	
+	<delete id="removeComment">
+		delete from tbl_movies_comment where combno = #{comBno}
+	</delete>
+	 
+	 <select id="getComment" resultType="com.firstgroup.movies.domain.MoviesCommentVO">
+	 	select * from tbl_movies_comment where combno = #{comBno}
+	 </select>
+	 
+	 <select id="bestComment" resultType="com.firstgroup.movies.domain.MoviesCommentVO">
+	<![CDATA[ 
+		SELECT *
+		FROM (
+		SELECT m.title, c.*, ROW_NUMBER() OVER (ORDER BY c.recommend DESC) AS rn
+		FROM tbl_movies m
+		INNER JOIN tbl_movies_comment c ON m.movbno = c.movbno
+		WHERE m.movbno = #{movBno}
+		)
+		WHERE rn <= 3
+		]]>
+	</select>
+	 
+  	<!-- 댓글수정 -->
+  	<update id="modifyComment">
+  		<![CDATA[ 
+			update tbl_movies_comment set content = #{content}, up_date = sysdate where combno = #{comBno}
+		]]>
+	</update>
+	
+</mapper>

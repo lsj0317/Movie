@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.firstgroup.movies.mapper.MemberMapper">
+
+	<resultMap type="com.firstgroup.movies.domain.MemberVO" id="memberMap">
+		<id property="id" column="id"/>
+		<result property="membno" column="membno"/>
+		<result property="id" column="id"/>
+		<result property="pw" column="pw"/>
+		<result property="name" column="name"/>
+		<result property="nickName" column="nickName"/>
+		<result property="zonecode" column="zonecode"/>
+		<result property="roadAddress" column="roadAddress"/>
+		<result property="buildingName" column="buildingName"/>
+		<result property="adress" column="adress"/>
+		<result property="phone" column="phone"/>
+		<result property="regdate" column="regdate"/>
+		<result property="memImgno" column="memImgno"/>
+		<collection property="authList" resultMap="authMap"/>
+	</resultMap>
+  
+	<resultMap type="com.firstgroup.movies.domain.AuthVO" id="authMap">
+	    <result property="id" column="id"/>
+	    <result property="auth" column="auth"/>
+	</resultMap>
+  	
+  	<sql id="criteria">
+		<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+			<foreach item='type' collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'N'.toString()">
+							nickName like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'T'.toString()">
+							phone like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'A'.toString()">
+							lower(auth) like lower('%'||#{keyword}||'%')
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+  	
+  	
+  	<select id="getMemListWithPasing" resultMap="memberMap">
+  		<![CDATA[ 
+  		select * from (
+  		
+  		SELECT rownum rn, mem.id,pw, name, nickName,zonecode,roadAddress,buildingName,adress,phone,regdate, auth FROM tbl_member mem LEFT OUTER JOIN tbl_member_auth auth on mem.id = auth.id WHERE   
+		]]>
+		<include refid="criteria"></include>
+		<![CDATA[    
+		      rownum <= #{pageNum} * #{amount}
+		      )
+		  where rn > (#{pageNum} -1) * #{amount}   
+		  ]]>
+  	</select>
+  	
+  	<select id="getTotalCount" resultType="int">
+  		select count(*) FROM tbl_member mem LEFT OUTER JOIN tbl_member_auth auth on mem.id = auth.id where <include refid="criteria"></include> membno > 0
+  	</select>
+  	
+  	<select id="getMemList" resultMap="memberMap">
+  		SELECT mem.membno, name, nickName,zonecode,roadAddress,buildingName, adress, phone, regdate,auth.id, auth FROM tbl_member mem LEFT OUTER JOIN tbl_member_auth auth on mem.id = auth.id
+  	</select>
+  	
+	<select id="read" parameterType="String" resultMap="memberMap">
+		<![CDATA[ 
+			SELECT 
+			mem.id,pw, name, nickName,zonecode,roadAddress,buildingName,adress,phone,regdate, auth FROM tbl_member mem LEFT OUTER JOIN tbl_member_auth auth on mem.id = auth.id WHERE mem.id = #{id}
+		]]>
+	</select>
+<!-- 회원가입 -->
+  
+	<insert id ="insertMember" parameterType="com.firstgroup.movies.domain.MemberVO">
+		<selectKey keyProperty="membno" order="BEFORE" resultType="long">
+	    		select seq_member.nextval from dual
+    	</selectKey>
+		<![CDATA[ 
+			insert into tbl_member (membno, id, pw, name, nickName, phone,zonecode,roadAddress,buildingName, adress)
+			values (#{membno}, #{id}, #{pw}, #{name}, #{nickName}, #{phone},#{zonecode},#{roadAddress},#{buildingName}, #{adress})
+		]]>
+	</insert>
+
+  <!-- 회원 id 정보 가져오기 -->
+ <select id = "getMember" resultType="com.firstgroup.movies.domain.MemberVO">  <!-- "memberMap" -->
+	    <![CDATA[
+	
+		select * from tbl_member where id = #{id}
+		
+		 ]]>
+	</select>
+	
+	<!-- 회원정보 수정 -->
+	<update id="updateMember">
+		 <![CDATA[
+			update tbl_member
+				set	pw=#{pw},
+					name = #{name},
+					nickName = #{nickName},
+					zonecode=#{zonecode},
+					roadAddress=#{roadAddress},
+					buildingName=#{buildingName},
+					adress = #{adress},
+					phone = #{phone}
+				where id=#{id}	
+		 ]]>
+	</update>
+	<!-- 탈퇴 -->
+	<delete id="deleteMember">
+		delete from tbl_member where membno = #{bno}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.firstgroup.movies.mapper.DirectorMapper">
+
+		<resultMap type="com.firstgroup.movies.domain.DirectorVO" id="dirMap">
+		<id property="dirBno" column="dirbno"/>
+		<result property="dirName" column="dirname"/>
+		<result property="dirAge" column="dirage"/>
+	</resultMap>
+	
+	 
+  	 	<!-- 감독 insert -->
+	<insert id="insertDirector" useGeneratedKeys="true" keyProperty="dirBno">
+		<selectKey keyProperty="dirBno" order="BEFORE" resultType="long">
+	    		select seq_director.nextval from dual
+    	</selectKey>
+		insert into tbl_director(dirbno, dirname, age, dirbirth)
+		values(#{dirBno}, #{dirName}, #{age}, #{dirBirth})
+	</insert>
+  	
+  		<!-- 전체 감독정보 불러오기 -->
+	<select id="getDirectorList" resultType="com.firstgroup.movies.domain.DirectorVO">
+		select * from tbl_director where dirbno > 0
+	</select>
+	
+  	<!-- 한명의 감독 정보 불러오기 -->
+	 <select id="getDirector" resultType="com.firstgroup.movies.domain.DirectorVO">
+	 	select * from tbl_director where dirbno =  #{dirbno}
+		
+	 </select>
+	 
+	 <!-- 한명의 감독  수정하기 -->
+  	<update id="modify">
+  		<![CDATA[
+			update tbl_director
+				set	dirName = #{dirName},
+					age = #{age},	
+					dirBirth = #{dirBirth},
+		 ]]>
+		<if test="dirDead!=null">
+					dirDead = #{dirDead},
+		</if>
+							
+					dirupdate = sysdate
+				where dirBno= #{dirBno}	
+  	</update>
+  	
+	<!-- 한명의 감독 정보 삭제하기 -->
+  	<delete id="remove">
+		delete from tbl_director where dirBno = #{dirBno}
+	</delete>
+  	
+</mapper>

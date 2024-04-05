@@ -1,0 +1,140 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/views/common/header.jsp" %>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec"%>
+<sec:authentication property="principal" var="pinfo" />
+<div class="container pt-6">
+    <div class="card o-hidden border-0 shadow-lg my-3">
+        <div class="card-body p-2">
+            <!-- Nested Row within Card Body -->
+         
+               <div class="row justify-content-center">
+                   <div class="col-lg-7 p-5">
+                       <div class="text-center">
+                           <h1 class="h4 text-gray-900 mb-4">회원 수정을 해보자 !</h1>
+                       </div>
+                       <input type="file" name="imgList" id="file-input" accept="image/*" style="display: none;" multiple>
+                       <form role="form" class="user" action="/member/update" method="post">
+							<input type="hidden" name="${_csrf.parameterName}" value = "${_csrf.token}"/>
+							<input type="hidden" name="membno" value="${user.membno }"/>
+							<input type="hidden" name="memid" value="${ user.id }" />
+							<div class="row justify-content-center">
+									<div class="col-4">
+							        	<div id="uploadedImages" class="carousel slide carousel-fade" data-bs-ride="carousel" style="width:90%; height: 90%">
+							        		<div class="carousel-inner" style="width:100%; height: 100%">
+												<c:forEach items="${user.imgList}" var="img" varStatus="i" begin="0">
+													<c:choose>
+													    <c:when test="${not empty img}">
+													    	<c:choose>
+													    		<c:when test="${ i.index == 0 }">
+													    			<div class="carousel-item active">
+													    				<c:set var="uploadPath" value="${fn:replace(img.uploadPath, '\\\\', '/')}"/>
+																		<c:set var="imagePath" value="${uploadPath}/${img.uuid}_${img.fileName}"/>
+																		<c:url var="imageUrl" value="/member/download"/>
+																		<img src="<c:out value="${imageUrl}?fileName=${imagePath}"/>"  width="100%" class="img-fluid" uploadPath="${uploadPath}" uuid="${img.uuid}" fileName="${img.fileName}">
+													    			</div>
+													    		</c:when>
+													    		<c:otherwise>
+													    			<div class="carousel-item">
+													    				<c:set var="uploadPath" value="${fn:replace(img.uploadPath, '\\\\', '/')}"/>
+																		<c:set var="imagePath" value="${uploadPath}/${img.uuid}_${img.fileName}"/>
+																		<c:url var="imageUrl" value="/member/download"/>
+																		<img src="<c:out value="${imageUrl}?fileName=${imagePath}"/>"  width="100%" class="img-fluid" uploadPath="${uploadPath}" uuid="${img.uuid}" fileName="${img.fileName}">
+													    			</div>
+													    		</c:otherwise>
+													    	</c:choose>
+													    </c:when>
+													    <c:otherwise>
+													        <!-- 이미지가 없는 경우 대체 내용 추가 -->
+													        <div id="drop-area" style="width:100%;">
+																<p>이미지를 드래그 앤 드롭 하거나 클릭하여 업로드하세요.</p>
+										        			</div>
+													    </c:otherwise>
+													</c:choose>
+												</c:forEach>
+							        		</div>
+							        		<button class="carousel-control-prev" type="button" data-bs-target="#uploadedImages" data-bs-slide="prev">
+												<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Previous</span>
+											</button>
+											<button class="carousel-control-next" type="button" data-bs-target="#uploadedImages" data-bs-slide="next">
+												<span class="carousel-control-next-icon" aria-hidden="true"></span>
+												<span class="visually-hidden">Next</span>
+											</button>
+											<button type="button" class="carousel-control-add" id="uploadImage" data-bs-target="#uploadedImages">
+												<span class="bi bi-file-plus fz20" aria-hidden="true"></span>
+												<span class="visually-hidden">Add</span>
+											</button>
+											<button type="button" class="carousel-control-remove" id="deleteImage" data-bs-target="#uploadedImages">
+												<span class="bi bi-file-x fz20" aria-hidden="true"></span>
+												<span class="visually-hidden">Remove</span>
+											</button>
+							        	</div>
+							        </div>
+							        <div class="col-8">
+			                           <div class="form-group">
+			                               <div class="mb-sm-1 pt-3">
+			                               	<input type="password" class="form-control form-control-user" id="pw" name="pw" placeholder="비밀번호">
+			                            	</div>
+			                        	</div>
+			                           <div class="form-group row">
+			                               <div class="col-sm-6 pt-3">
+			                                   <input type="text" class="form-control form-control-user" id="name" name="name" placeholder="이름" value="${user.name }">
+			                               </div>
+			                               <div class="col-sm-6 pt-3">
+			                                   <input type="text" class="form-control form-control-user"id="Nickname" name="nickName" placeholder="닉네임"value="${user.nickName }">
+			                               </div>
+			                           </div>
+										<div class="form-group">
+											<div class="mb-sm-1 pt-3">
+												<input type="text" class="form-control form-control-user" id="phone" name="phone" placeholder="핸드폰번호"value="${user.phone}">
+											</div>
+										</div>
+							        </div>
+								</div>
+							<div class="form-group row">
+								<div class="col-sm-6 mb-sm-1">
+									<input type="text" class="form-control form-control-user" id="adress" name="zonecode" placeholder="우편번호" value="${user.zonecode }">
+								</div>
+								<div class="col-sm-6">
+									<a type="button" class="btn btn-primary btn-user btn-block" id="addressInput">우편번호</a>
+								</div>
+								<div class="col-sm-12 mb-sm-1">
+									<input type="text" class="form-control form-control-user" name="roadAddress" placeholder="도로명주소" value="${user.roadAddress }">
+								</div>
+								<div class="col-sm-12 mb-sm-1">
+									<input type="text" class="form-control form-control-user" name="buildingName" placeholder="건물이름" value="${user.buildingName }">
+	                            </div>
+								<div class="col-sm-6 mb-sm-3">
+									<input type="text" class="form-control form-control-user" name="adress" placeholder="나머지" value="${user.adress }">
+								</div>
+						</div>
+						<div class="row">
+						    <button type="submit" class="col-sm-6 btn btn-primary btn-user btn-block">
+                              저장하기
+                            </button>
+	                        <button type="button" value="${ user.membno }" class="col-sm-6 btn btn-primary btn-user btn-block" onclick="deleteData(this)">탈퇴하기</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+console.log(document.getElementById("addressInput"));
+document.getElementById("addressInput").addEventListener("click",function(){
+	new daum.Postcode({
+		oncomplete: function(data) {
+            // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분입니다.
+            // 예제를 참고하여 다양한 활용법을 확인해 보세요.
+        	document.querySelector('[name=zonecode]').value = data.zonecode;
+        	document.querySelector('[name=roadAddress]').value = data.roadAddress;
+        	document.querySelector('[name=buildingName]').value = data.buildingName;
+        }
+    }).open();
+});
+</script>
+
+<%@ include file="/WEB-INF/views/common/footer.jsp" %>
